@@ -1,0 +1,480 @@
+.admin-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  background: #f4fbff;
+}
+
+.admin-sidebar {
+  background: #ffffff;
+  border-right: 1px solid #d7ecf5;
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.admin-brand {
+  font-weight: 700;
+  color: #1d6f8c;
+  margin-bottom: 18px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #eaf7fc;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-nav-link {
+  text-decoration: none;
+  color: #36506a;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #e1f0f6;
+  background: #fff;
+  font-size: 0.9rem;
+}
+
+.admin-nav-link.active {
+  background: #eaf8ff;
+  color: #11607b;
+  border-color: #bee4f2;
+  font-weight: 700;
+}
+
+.admin-main {
+  padding: 20px;
+}
+
+.admin-header {
+  background: #fff;
+  border: 1px solid #dceff7;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(55, 112, 139, 0.1);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.admin-header p {
+  margin: 4px 0 0;
+  color: #67809b;
+  font-size: 0.86rem;
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #4f6782;
+  font-size: 0.9rem;
+}
+
+.admin-content {
+  margin-top: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.admin-summary-card {
+  background: #fff;
+  border: 1px solid #d7ebf5;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(55, 112, 139, 0.08);
+  padding: 14px;
+}
+
+.admin-summary-card p {
+  margin: 0;
+  color: #5f7894;
+}
+
+.admin-summary-card h3 {
+  margin: 8px 0 0;
+  font-size: 1.5rem;
+  color: #1d6f8c;
+}
+
+.admin-quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.admin-link-card {
+  text-decoration: none;
+  color: #35506a;
+  background: #fff;
+  border: 1px solid #d7ebf5;
+  border-radius: 14px;
+  padding: 12px;
+  font-weight: 600;
+}
+
+.admin-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-search {
+  min-width: 240px;
+  border: 1px solid #cfe3ee;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-family: inherit;
+}
+
+.btn-primary,
+.btn.btn-primary {
+  background: linear-gradient(145deg, #2ea6c6, #66cbe3);
+  border: 1px solid #2ea6c6;
+  color: #fff;
+}
+
+.btn-danger,
+.btn.btn-danger {
+  background: linear-gradient(145deg, #d84444, #f06b6b);
+  border: 1px solid #d84444;
+  color: #fff;
+}
+
+.admin-card {
+  background: #fff;
+  border: 1px solid #d7ebf5;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(55, 112, 139, 0.08);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-layout-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.enrollment-layout-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.enrollment-session-card,
+.participant-session-card {
+  min-width: 0;
+}
+
+.enrollment-session-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cfe3ee;
+  border-radius: 9px;
+  padding: 9px;
+  font-family: inherit;
+}
+
+.admin-form {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: #35506a;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  border: 1px solid #cfe3ee;
+  border-radius: 9px;
+  padding: 9px;
+  font-family: inherit;
+}
+
+.admin-field-title {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #35506a;
+}
+
+.admin-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.assign-students-list-wrap {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+  scrollbar-color: #8b8b8b #d9dde3;
+}
+
+.assign-students-list-wrap::-webkit-scrollbar {
+  width: 10px;
+}
+
+.assign-students-list-wrap::-webkit-scrollbar-track {
+  background: #d9dde3;
+  border-radius: 999px;
+}
+
+.assign-students-list-wrap::-webkit-scrollbar-thumb {
+  background: #8b8b8b;
+  border-radius: 999px;
+}
+
+.admin-check-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: #f9fdff;
+  border: 1px solid #def0f7;
+  border-radius: 9px;
+  padding: 6px 8px;
+  font-size: 0.84rem;
+}
+
+.admin-table-wrap {
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #d7ebf5;
+  border-radius: 14px;
+  scrollbar-color: #8b8b8b #d9dde3;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid #ecf5fa;
+  text-align: left;
+  padding: 10px;
+  font-size: 0.84rem;
+}
+
+.admin-table th {
+  background: #f4fbff;
+  color: #3d5872;
+}
+
+.admin-empty-cell {
+  text-align: center;
+  color: #607994;
+}
+
+.admin-actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-list-compact {
+  align-content: start;
+  grid-auto-rows: min-content;
+}
+
+.participant-session-card {
+  grid-template-rows: auto 1fr;
+  min-height: 320px;
+  max-height: 420px;
+  overflow: hidden;
+}
+
+.participant-session-list-wrap {
+  min-height: 0;
+  height: 100%;
+  max-height: none;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+  scrollbar-color: #8b8b8b #d9dde3;
+}
+
+.participant-session-list-wrap::-webkit-scrollbar {
+  width: 10px;
+}
+
+.participant-session-list-wrap::-webkit-scrollbar-track {
+  background: #d9dde3;
+  border-radius: 999px;
+}
+
+.participant-session-list-wrap::-webkit-scrollbar-thumb {
+  background: #8b8b8b;
+  border-radius: 999px;
+}
+
+.admin-table-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.admin-table-wrap::-webkit-scrollbar-track {
+  background: #d9dde3;
+  border-radius: 999px;
+}
+
+.admin-table-wrap::-webkit-scrollbar-thumb {
+  background: #8b8b8b;
+  border-radius: 999px;
+}
+
+.admin-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  background: #f7fcff;
+  border: 1px solid #def0f7;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.admin-list li p {
+  margin: 2px 0 0;
+  color: #607994;
+  font-size: 0.8rem;
+}
+
+.admin-actions-row {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.admin-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(8, 30, 43, 0.38);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.admin-popup-card {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid #cde8f3;
+  border-radius: 18px;
+  box-shadow: 0 24px 50px rgba(17, 82, 107, 0.26);
+  padding: 22px 18px 18px;
+  text-align: center;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-popup-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0a7f63;
+  background: radial-gradient(circle at 30% 30%, #f1fff9 0%, #d8f7eb 70%);
+  border: 1px solid #aeead4;
+}
+
+.admin-popup-icon-danger {
+  color: #a63636;
+  background: radial-gradient(circle at 30% 30%, #fff5f5 0%, #ffdede 70%);
+  border: 1px solid #f0b4b4;
+}
+
+.admin-popup-card h3 {
+  margin: 2px 0 0;
+  color: #1d6f8c;
+}
+
+.admin-popup-card p {
+  margin: 0;
+  color: #48657f;
+}
+
+.admin-popup-card .btn {
+  justify-self: center;
+  min-width: 190px;
+}
+
+.admin-popup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-popup-actions .btn {
+  min-width: 140px;
+}
+
+@media (max-width: 900px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d7ecf5;
+  }
+
+  .admin-main {
+    padding: 12px;
+  }
+
+  .enrollment-layout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .participant-session-card {
+    min-height: 260px;
+    max-height: 360px;
+  }
+
+  .assign-students-list-wrap {
+    max-height: 260px;
+  }
+}

@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Ganti email ini dengan email admin Firebase Auth Anda.
+    function isAdmin() {
+      return signedIn() &&
+        request.auth.token.email != null &&
+        (
+          request.auth.token.email in [
+            "admin@neratix.id"
+          ] ||
+          request.auth.token.email.matches(".*@neratix\\.id$")
+        );
+    }
+
+    function isOwnerByEmail(email) {
+      return signedIn() &&
+        request.auth.token.email != null &&
+        request.auth.token.email == email;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update, delete: if signedIn();
+    }
+
+    match /user_progress/{progressId} {
+      allow read, create, update, delete: if signedIn();
+    }
+
+    match /live_sessions/{sessionId} {
+      allow read: if signedIn();
+      // Temporary unblock: izinkan akun yang sudah login mengelola live session.
+      allow create, update, delete: if signedIn();
+    }
+
+    match /live_session_enrollments/{enrollmentId} {
+      allow read, create, update, delete: if signedIn();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
