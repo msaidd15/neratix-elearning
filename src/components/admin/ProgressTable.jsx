@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ProgressTable({ rows = [], onReset, onUpdate }) {
+export default function ProgressTable({ rows = [], onReset, onUpdate, onDelete }) {
   const [editingRowId, setEditingRowId] = useState("");
   const [draftProgress, setDraftProgress] = useState(0);
 
@@ -65,6 +65,9 @@ export default function ProgressTable({ rows = [], onReset, onUpdate }) {
                   )}
                   <button type="button" className="btn btn-outline" onClick={() => onReset(row)}>
                     Reset
+                  </button>
+                  <button type="button" className="btn btn-danger" onClick={() => onDelete(row)}>
+                    Hapus
                   </button>
                 </td>
               </tr>

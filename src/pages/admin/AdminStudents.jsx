@@ -58,6 +58,9 @@ export default function AdminStudents() {
       if (result?.mode === "soft-delete") {
         alert("Siswa diarsipkan (soft delete), karena rules Firestore belum mengizinkan delete.");
       }
+      if (result?.hasPermissionDeniedCleanup) {
+        alert("Sebagian data progress/enrollment belum bisa dihapus karena rules Firestore (permission-denied).");
+      }
     } catch (error) {
       console.error("[AdminStudents] gagal hapus siswa:", error);
       const message = typeof error?.message === "string" && error.message.trim()

@@ -16,13 +16,58 @@ const usersCollection = collection(db, "users");
 const progressCollection = collection(db, "user_progress");
 const enrollmentsCollection = collection(db, "live_session_enrollments");
 
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+async function getDocsByNormalizedEmail(collectionRef, fieldName, targetEmail) {
+  const normalizedTarget = normalizeEmail(targetEmail);
+  if (!normalizedTarget) return [];
+
+  const snapshot = await getDocs(collectionRef);
+  return snapshot.docs.filter((item) => normalizeEmail(item.data()?.[fieldName]) === normalizedTarget);
+}
+
+async function deleteByDocIds(collectionName, docIds = []) {
+  if (!Array.isArray(docIds) || docIds.length === 0) {
+    return { deletedCount: 0, hasPermissionDenied: false };
+  }
+
+  const results = await Promise.allSettled(
+    docIds.map((id) => deleteDoc(doc(db, collectionName, id)))
+  );
+
+  let hasPermissionDenied = false;
+  for (const result of results) {
+    if (result.status !== "rejected") continue;
+    if (result.reason?.code === "permission-denied") {
+      hasPermissionDenied = true;
+      continue;
+    }
+    throw result.reason;
+  }
+
+  const deletedCount = results.filter((result) => result.status === "fulfilled").length;
+  return { deletedCount, hasPermissionDenied };
+}
+
 export async function getUserDataByEmail(email) {
   if (!email) return null;
-  const userQuery = query(usersCollection, where("email", "==", email), limit(1));
-  const snapshot = await getDocs(userQuery);
-  if (snapshot.empty) return null;
+  const normalizedEmail = normalizeEmail(email);
+  const candidateEmails = [...new Set([email, normalizedEmail].map((item) => String(item || "").trim()).filter(Boolean))];
 
-  const userDoc = snapshot.docs[0];
+  let userDoc = null;
+  for (const candidateEmail of candidateEmails) {
+    const userQuery = query(usersCollection, where("email", "==", candidateEmail), limit(1));
+    const snapshot = await getDocs(userQuery);
+    if (!snapshot.empty) {
+      userDoc = snapshot.docs[0];
+      break;
+    }
+  }
+
+  if (!userDoc) return null;
+
   const data = userDoc.data();
 
   return {
@@ -61,7 +106,7 @@ export async function getStudents(searchText = "") {
 export async function createStudentProfile({ name, email, packages = [] }) {
   return addDoc(usersCollection, {
     name: name || "",
-    email: email || "",
+    email: normalizeEmail(email),
     role: "student",
     packages: Array.isArray(packages) ? packages : []
   });
@@ -69,7 +114,11 @@ export async function createStudentProfile({ name, email, packages = [] }) {
 
 export async function updateStudentProfile(userId, payload) {
   const userRef = doc(db, "users", userId);
-  return updateDoc(userRef, payload);
+  const nextPayload = { ...(payload || {}) };
+  if (typeof nextPayload.email === "string") {
+    nextPayload.email = normalizeEmail(nextPayload.email);
+  }
+  return updateDoc(userRef, nextPayload);
 }
 
 export async function updateStudentPackages(userId, packages) {
@@ -88,42 +137,40 @@ export async function getUserById(userId) {
 
 export async function deleteStudentData(student) {
   const studentId = student?.id;
-  const studentEmail = typeof student?.email === "string" ? student.email : "";
+  const studentEmail = normalizeEmail(student?.email);
   if (!studentId) {
     throw new Error("Student ID tidak ditemukan.");
   }
 
-  const progressQuery = studentEmail
-    ? query(progressCollection, where("email", "==", studentEmail))
-    : null;
-  const enrollmentsQuery = studentEmail
-    ? query(enrollmentsCollection, where("studentEmail", "==", studentEmail))
-    : null;
-
-  const [progressSnapshot, enrollmentsSnapshot] = await Promise.all([
-    progressQuery ? getDocs(progressQuery) : Promise.resolve({ docs: [] }),
-    enrollmentsQuery ? getDocs(enrollmentsQuery) : Promise.resolve({ docs: [] })
+  const [progressDocs, enrollmentDocs] = await Promise.all([
+    getDocsByNormalizedEmail(progressCollection, "email", studentEmail),
+    getDocsByNormalizedEmail(enrollmentsCollection, "studentEmail", studentEmail)
   ]);
 
-  try {
-    const deleteTasks = [
-      ...progressSnapshot.docs.map((item) => deleteDoc(doc(db, "user_progress", item.id))),
-      ...enrollmentsSnapshot.docs.map((item) => deleteDoc(doc(db, "live_session_enrollments", item.id))),
-      deleteDoc(doc(db, "users", studentId))
-    ];
-    await Promise.all(deleteTasks);
-    return { mode: "hard-delete" };
-  } catch (error) {
-    if (error?.code !== "permission-denied") {
-      throw error;
-    }
+  const progressResult = await deleteByDocIds("user_progress", progressDocs.map((item) => item.id));
+  const enrollmentResult = await deleteByDocIds("live_session_enrollments", enrollmentDocs.map((item) => item.id));
 
-    // Fallback when rules deny delete: mark as archived so it disappears from student list.
+  try {
+    await deleteDoc(doc(db, "users", studentId));
+    return {
+      mode: "hard-delete",
+      deletedProgressCount: progressResult.deletedCount,
+      deletedEnrollmentCount: enrollmentResult.deletedCount
+    };
+  } catch (error) {
+    if (error?.code !== "permission-denied") throw error;
+
+    // Fallback when rules deny user delete: archive user so it disappears from student list.
     await updateDoc(doc(db, "users", studentId), {
       role: "archived_student",
       packages: [],
       archivedAt: new Date().toISOString()
     });
-    return { mode: "soft-delete" };
+    return {
+      mode: "soft-delete",
+      deletedProgressCount: progressResult.deletedCount,
+      deletedEnrollmentCount: enrollmentResult.deletedCount,
+      hasPermissionDeniedCleanup: progressResult.hasPermissionDenied || enrollmentResult.hasPermissionDenied
+    };
   }
 }
