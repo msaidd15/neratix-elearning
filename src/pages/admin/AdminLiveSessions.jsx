@@ -15,6 +15,11 @@ export default function AdminLiveSessions() {
   const [adminName, setAdminName] = useState("Admin");
   const [sessions, setSessions] = useState([]);
   const [editingSession, setEditingSession] = useState(null);
+  const [popupState, setPopupState] = useState({ visible: false, title: "", message: "", type: "success" });
+
+  function showPopup({ title, message, type = "success" }) {
+    setPopupState({ visible: true, title, message, type });
+  }
 
   async function loadSessions() {
     const data = await getAllLiveSessions();
@@ -35,19 +40,37 @@ export default function AdminLiveSessions() {
     try {
       if (editingSession?.id) {
         await updateLiveSession(editingSession.id, payload);
+        showPopup({
+          title: "Live Session Diperbarui",
+          message: "Perubahan live session berhasil disimpan.",
+          type: "success"
+        });
       } else {
         await createLiveSession(payload);
+        showPopup({
+          title: "Live Session Ditambahkan",
+          message: "Live session baru berhasil ditambahkan.",
+          type: "success"
+        });
       }
       setEditingSession(null);
       await loadSessions();
     } catch (error) {
       console.error("[AdminLiveSessions] gagal simpan:", error);
       if (error?.code === "permission-denied") {
-        alert("Gagal menyimpan live session: akun ini belum punya izin admin Firestore.");
+        showPopup({
+          title: "Gagal Menyimpan",
+          message: "Akun ini belum punya izin admin Firestore.",
+          type: "warning"
+        });
         return;
       }
 
-      alert(error?.message ? `Gagal menyimpan live session: ${error.message}` : "Gagal menyimpan live session.");
+      showPopup({
+        title: "Gagal Menyimpan",
+        message: error?.message ? `Gagal menyimpan live session: ${error.message}` : "Gagal menyimpan live session.",
+        type: "warning"
+      });
     }
   }
 
@@ -102,6 +125,28 @@ export default function AdminLiveSessions() {
           </ul>
         </section>
       </div>
+
+      {popupState.visible && (
+        <div className="admin-popup-overlay" role="dialog" aria-modal="true" aria-labelledby="live-session-popup-title">
+          <div className="admin-popup-card">
+            <div
+              className={`admin-popup-icon ${popupState.type === "warning" ? "admin-popup-icon-danger" : ""}`}
+              aria-hidden="true"
+            >
+              {popupState.type === "warning" ? "!" : "OK"}
+            </div>
+            <h3 id="live-session-popup-title">{popupState.title}</h3>
+            <p>{popupState.message}</p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setPopupState({ visible: false, title: "", message: "", type: "success" })}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
