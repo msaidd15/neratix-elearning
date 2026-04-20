@@ -5,7 +5,7 @@ const BASE_LESSONS = [
     title: "Kenalan dengan Robot",
     description: "Mengenal apa itu robot dan bagaimana robot membantu kehidupan sehari-hari.",
     duration: "12 menit",
-    videoUrl: "https://www.youtube.com/embed/J--QVhGheP4",
+    videoUrl: "https://www.youtube.com/embed/-kCy3yIIoO0",
     article: [
       "Robot adalah mesin cerdas yang bisa membantu manusia melakukan tugas tertentu. Di rumah, robot bisa membantu membersihkan ruangan. Di pabrik, robot membantu membuat produk dengan cepat dan rapi.",
       "Pada materi ini, kita belajar bahwa robot bekerja berdasarkan perintah. Perintah itu bisa datang dari tombol, sensor, atau program coding.",

@@ -35,6 +35,36 @@ export default function LessonPage() {
   const isCompleted = completedLessons.includes(currentLesson?.id);
   const nextIncompleteId = progressState?.currentLesson || null;
   const canContinueToNext = isCompleted && Number.isInteger(nextIncompleteId) && nextIncompleteId !== currentLesson?.id;
+  const safeVideoUrl = useMemo(() => {
+    const rawVideoUrl = currentLesson?.videoUrl;
+    if (!rawVideoUrl) return "";
+
+    try {
+      const embedUrl = new URL(rawVideoUrl);
+
+      if (embedUrl.hostname.includes("youtube.com")) {
+        embedUrl.hostname = "www.youtube-nocookie.com";
+      }
+
+      embedUrl.searchParams.set("rel", "0");
+      embedUrl.searchParams.set("modestbranding", "1");
+      embedUrl.searchParams.set("iv_load_policy", "3");
+      embedUrl.searchParams.set("disablekb", "1");
+      embedUrl.searchParams.set("fs", "1");
+      embedUrl.searchParams.set("loop", "1");
+
+      // Paksa loop ke video yang sama untuk meminimalkan rekomendasi video lain saat selesai.
+      const pathParts = embedUrl.pathname.split("/");
+      const videoId = pathParts[pathParts.length - 1] || "";
+      if (videoId) {
+        embedUrl.searchParams.set("playlist", videoId);
+      }
+
+      return embedUrl.toString();
+    } catch {
+      return rawVideoUrl;
+    }
+  }, [currentLesson?.videoUrl]);
 
   useEffect(() => {
     if (!config) return;
@@ -138,10 +168,11 @@ export default function LessonPage() {
           <h3>Video Pembelajaran</h3>
           <div className="video-wrap">
             <iframe
-              src={currentLesson.videoUrl}
+              src={safeVideoUrl}
               title="Video Materi Robotik"
               loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              sandbox="allow-scripts allow-same-origin allow-presentation"
+              allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           </div>
