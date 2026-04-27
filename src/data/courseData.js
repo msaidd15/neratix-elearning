@@ -169,6 +169,101 @@ const BASE_LESSONS = [
   }
 ];
 
+function buildQuizForLesson(lesson) {
+  const lessonNumber = String(lesson.id).padStart(2, "0");
+  const optionSkills = ["sensor", "motor", "logika", "coding"];
+  const optionDuration = ["5 menit", "10 menit", "15 menit", lesson.duration];
+  const optionModule = ["Dashboard", "Materi", "Admin", "Login"];
+
+  return [
+    {
+      id: `${lesson.id}-q1`,
+      question: `Materi #${lessonNumber} membahas topik utama apa?`,
+      options: { A: lesson.title, B: "Sejarah internet", C: "Bahasa Inggris", D: "Matematika dasar" },
+      answer: "A"
+    },
+    {
+      id: `${lesson.id}-q2`,
+      question: `Durasi yang tertera pada materi "${lesson.title}" adalah...`,
+      options: { A: optionDuration[0], B: optionDuration[1], C: optionDuration[2], D: optionDuration[3] },
+      answer: "D"
+    },
+    {
+      id: `${lesson.id}-q3`,
+      question: "Komponen robot yang berfungsi sebagai penggerak adalah...",
+      options: { A: "Sensor", B: "Motor", C: "Baterai cadangan", D: "Layar monitor" },
+      answer: "B"
+    },
+    {
+      id: `${lesson.id}-q4`,
+      question: "Tujuan belajar materi ini paling tepat adalah...",
+      options: {
+        A: "Menghafal teori tanpa praktik",
+        B: "Memahami konsep robotik dan penerapannya",
+        C: "Menggambar robot saja",
+        D: "Membuat game 3D"
+      },
+      answer: "B"
+    },
+    {
+      id: `${lesson.id}-q5`,
+      question: "Pada pembelajaran robotik, langkah yang benar saat robot belum sesuai adalah...",
+      options: { A: "Langsung menyerah", B: "Menghapus semua komponen", C: "Melakukan debugging", D: "Mematikan aplikasi" },
+      answer: "C"
+    },
+    {
+      id: `${lesson.id}-q6`,
+      question: "Materi ini termasuk bagian dari pembelajaran...",
+      options: { A: "Robotik dasar", B: "Memasak", C: "Seni lukis", D: "Olahraga renang" },
+      answer: "A"
+    },
+    {
+      id: `${lesson.id}-q7`,
+      question: `Jika ingin melanjutkan materi berikutnya, menu yang digunakan adalah...`,
+      options: {
+        A: optionModule[0],
+        B: optionModule[1],
+        C: "Tutup Browser",
+        D: optionModule[2]
+      },
+      answer: "B"
+    },
+    {
+      id: `${lesson.id}-q8`,
+      question: "Dalam konteks robotik, data dari sensor digunakan untuk...",
+      options: {
+        A: "Menghias tampilan",
+        B: "Memberi keputusan gerak robot",
+        C: "Menambah ukuran robot",
+        D: "Mengganti warna kabel"
+      },
+      answer: "B"
+    },
+    {
+      id: `${lesson.id}-q9`,
+      question: `Pilihan yang paling sesuai dengan materi "${lesson.title}" adalah...`,
+      options: {
+        A: `Fokus pada ${optionSkills[(lesson.id - 1) % optionSkills.length]} robot`,
+        B: "Fokus pada resep makanan",
+        C: "Fokus pada sejarah kerajaan",
+        D: "Fokus pada astronomi"
+      },
+      answer: "A"
+    },
+    {
+      id: `${lesson.id}-q10`,
+      question: "Setelah menyelesaikan quiz, tindakan yang tepat adalah...",
+      options: {
+        A: "Mengabaikan hasil",
+        B: "Mengecek jawaban dan lanjut belajar",
+        C: "Keluar dari akun",
+        D: "Menghapus progress"
+      },
+      answer: "B"
+    }
+  ];
+}
+
 export const COURSE_CONFIG = {
   roboexplorer: {
     id: "roboexplorer",
@@ -199,22 +294,27 @@ export function getCourseLessons(courseKey) {
   if (!config) return [];
 
   return BASE_LESSONS.map((lesson) => {
+    let computedLesson = { ...lesson };
+
     if (lesson.id === 10) {
-      return {
-        ...lesson,
+      computedLesson = {
+        ...computedLesson,
         title: `Mini Project ${config.shortName}`
       };
     }
 
     if (lesson.id === 12) {
-      return {
-        ...lesson,
+      computedLesson = {
+        ...computedLesson,
         title: `Final Showcase`,
         description: `Tunjukkan hasil robotmu dan raih badge akhir ${config.shortName}.`
       };
     }
 
-    return { ...lesson };
+    return {
+      ...computedLesson,
+      quiz: buildQuizForLesson(computedLesson)
+    };
   });
 }
 

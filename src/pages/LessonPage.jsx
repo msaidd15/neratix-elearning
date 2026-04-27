@@ -9,6 +9,7 @@ import {
   sanitizeCompletedLessons
 } from "../lib/progressHelpers";
 import { loadProgress, saveProgressByCompletedLessons } from "../lib/progressStore";
+import { saveQuizResult } from "../services/quizResultsService";
 import "../styles/lesson.css";
 
 export default function LessonPage() {
@@ -20,6 +21,10 @@ export default function LessonPage() {
   const [progressState, setProgressState] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [activeMenu, setActiveMenu] = useState("materi");
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [isSavingQuiz, setIsSavingQuiz] = useState(false);
 
   const requestedId = Number(id);
   const completedLessons = progressState?.completedLessons || [];
@@ -35,6 +40,23 @@ export default function LessonPage() {
   const isCompleted = completedLessons.includes(currentLesson?.id);
   const nextIncompleteId = progressState?.currentLesson || null;
   const canContinueToNext = isCompleted && Number.isInteger(nextIncompleteId) && nextIncompleteId !== currentLesson?.id;
+  const currentQuiz = currentLesson?.quiz || [];
+  const quizScore = useMemo(() => {
+    if (!quizSubmitted || currentQuiz.length === 0) return 0;
+
+    return currentQuiz.reduce((total, quizItem) => {
+      const selected = quizAnswers[quizItem.id];
+      return selected === quizItem.answer ? total + 1 : total;
+    }, 0);
+  }, [currentQuiz, quizAnswers, quizSubmitted]);
+  const answeredCount = useMemo(() => {
+    if (!currentQuiz.length) return 0;
+    return currentQuiz.filter((quizItem) => Boolean(quizAnswers[quizItem.id])).length;
+  }, [currentQuiz, quizAnswers]);
+  const quizPercent = useMemo(() => {
+    if (!quizSubmitted || currentQuiz.length === 0) return 0;
+    return Math.round((quizScore / currentQuiz.length) * 100);
+  }, [currentQuiz.length, quizScore, quizSubmitted]);
   const safeVideoUrl = useMemo(() => {
     const rawVideoUrl = currentLesson?.videoUrl;
     if (!rawVideoUrl) return "";
@@ -96,6 +118,13 @@ export default function LessonPage() {
     }
   }, [allowedLessonId, courseKey, currentLesson, navigate, progressState, requestedId]);
 
+  useEffect(() => {
+    setActiveMenu("materi");
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setIsSavingQuiz(false);
+  }, [currentLesson?.id]);
+
   if (!config || !currentLesson || !progressState) return null;
 
   async function handleMarkComplete(event) {
@@ -127,6 +156,45 @@ export default function LessonPage() {
     }
 
     navigate(`/paket/${config.id}`);
+  }
+
+  function handleQuizAnswer(questionId, optionKey) {
+    setQuizSubmitted(false);
+    setQuizAnswers((previous) => ({
+      ...previous,
+      [questionId]: optionKey
+    }));
+  }
+
+  async function handleSubmitQuiz() {
+    if (currentQuiz.length === 0) return;
+    if (!userEmail || !config?.id || !currentLesson) return;
+
+    setIsSavingQuiz(true);
+    const nextScore = currentQuiz.reduce((total, quizItem) => {
+      const selected = quizAnswers[quizItem.id];
+      return selected === quizItem.answer ? total + 1 : total;
+    }, 0);
+
+    try {
+      await saveQuizResult({
+        email: userEmail,
+        courseId: config.id,
+        lessonId: currentLesson.id,
+        lessonTitle: currentLesson.title,
+        score: nextScore,
+        totalQuestions: currentQuiz.length,
+        answers: quizAnswers
+      });
+    } catch (error) {
+      console.error("Gagal menyimpan hasil quiz:", error);
+      alert("Hasil quiz belum tersimpan. Silakan coba lagi.");
+      setIsSavingQuiz(false);
+      return;
+    }
+
+    setQuizSubmitted(true);
+    setIsSavingQuiz(false);
   }
 
   return (
@@ -164,30 +232,120 @@ export default function LessonPage() {
           </div>
         </section>
 
-        <section className="lesson-video card">
-          <h3>Video Pembelajaran</h3>
-          <div className="video-wrap">
-            <iframe
-              src={safeVideoUrl}
-              title="Video Materi Robotik"
-              loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+        <section className="lesson-menu card">
+          <button
+            type="button"
+            className={`lesson-menu-btn ${activeMenu === "materi" ? "active" : ""}`}
+            onClick={() => setActiveMenu("materi")}
+          >
+            Materi
+          </button>
+          <button
+            type="button"
+            className={`lesson-menu-btn ${activeMenu === "quiz" ? "active" : ""}`}
+            onClick={() => setActiveMenu("quiz")}
+          >
+            Quiz
+          </button>
         </section>
 
-        <section className="lesson-article card">
-          <h3>Penjelasan Materi</h3>
-          <article id="lessonArticle">
-            {currentLesson.article.map((paragraph, index) => (
-              <p key={`${currentLesson.id}-${index}`}>{paragraph}</p>
-            ))}
-          </article>
-          <div className="article-note">{currentLesson.note}</div>
-        </section>
+        {activeMenu === "materi" ? (
+          <>
+            <section className="lesson-video card">
+              <h3>Video Pembelajaran</h3>
+              <div className="video-wrap">
+                <iframe
+                  src={safeVideoUrl}
+                  title="Video Materi Robotik"
+                  loading="lazy"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
+                  allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </section>
+
+            <section className="lesson-article card">
+              <h3>Penjelasan Materi</h3>
+              <article id="lessonArticle">
+                {currentLesson.article.map((paragraph, index) => (
+                  <p key={`${currentLesson.id}-${index}`}>{paragraph}</p>
+                ))}
+              </article>
+              <div className="article-note">{currentLesson.note}</div>
+            </section>
+          </>
+        ) : (
+          <section className="lesson-quiz card">
+            <div className="quiz-head">
+              <h3>Quiz Materi</h3>
+              <p>Pilih jawaban A sampai D pada setiap pertanyaan.</p>
+            </div>
+
+            <div className="quiz-list">
+              {currentQuiz.map((quizItem, index) => {
+                const selectedAnswer = quizAnswers[quizItem.id];
+
+                return (
+                  <article key={quizItem.id} className="quiz-item">
+                    <h4>{index + 1}. {quizItem.question}</h4>
+                    <div className="quiz-options">
+                      {Object.entries(quizItem.options).map(([optionKey, optionValue]) => {
+                        const inputId = `${quizItem.id}-${optionKey}`;
+                        return (
+                          <label key={inputId} htmlFor={inputId} className="quiz-option">
+                            <input
+                              id={inputId}
+                              type="radio"
+                              name={quizItem.id}
+                              value={optionKey}
+                              checked={selectedAnswer === optionKey}
+                              onChange={() => handleQuizAnswer(quizItem.id, optionKey)}
+                            />
+                            <span>{optionKey}. {optionValue}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="quiz-actions">
+              <button
+                className="lesson-btn lesson-btn-primary"
+                type="button"
+                onClick={handleSubmitQuiz}
+                disabled={isSavingQuiz}
+              >
+                {isSavingQuiz ? "Menyimpan..." : "Kirim Jawaban"}
+              </button>
+              <p className="quiz-progress">Terjawab {answeredCount}/{currentQuiz.length} soal</p>
+            </div>
+          </section>
+        )}
       </main>
+
+      {quizSubmitted ? (
+        <div
+          className="lesson-quiz-popup-overlay"
+          role="button"
+          tabIndex={0}
+          onClick={() => setQuizSubmitted(false)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              setQuizSubmitted(false);
+            }
+          }}
+        >
+          <div className="lesson-quiz-popup-card">
+            <p className="lesson-quiz-popup-kicker">Hasil Quiz</p>
+            <h3>Skor kamu {quizScore}/{currentQuiz.length}</h3>
+            <p>{quizPercent}% jawaban benar</p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

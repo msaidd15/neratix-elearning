@@ -32,6 +32,10 @@ service cloud.firestore {
       allow read, create, update, delete: if signedIn();
     }
 
+    match /user_quiz_results/{resultId} {
+      allow read, create, update, delete: if signedIn();
+    }
+
     match /live_sessions/{sessionId} {
       allow read: if signedIn();
       // Temporary unblock: izinkan akun yang sudah login mengelola live session.

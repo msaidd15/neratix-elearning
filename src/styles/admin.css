@@ -134,6 +134,29 @@
   flex-wrap: wrap;
 }
 
+.admin-tab-menu {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-tab-btn {
+  border: 1px solid #cde8f3;
+  background: #ffffff;
+  color: #35506a;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-tab-btn.active {
+  border-color: #2ea6c6;
+  background: #eaf8ff;
+  color: #11607b;
+}
+
 .admin-search {
   min-width: 240px;
   border: 1px solid #cfe3ee;
@@ -403,6 +426,32 @@
   gap: 10px;
 }
 
+.admin-popup-card-wide {
+  width: min(860px, 100%);
+  text-align: left;
+}
+
+.admin-popup-card-wide .btn {
+  justify-self: flex-end;
+  min-width: 120px;
+}
+
+.admin-history-wrap {
+  max-height: 340px;
+}
+
+.admin-quiz-detail-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-quiz-detail-cell .btn {
+  min-width: 0;
+  padding: 6px 10px;
+}
+
 .admin-popup-icon {
   width: 56px;
   height: 56px;
@@ -476,5 +525,10 @@
 
   .assign-students-list-wrap {
     max-height: 260px;
+  }
+
+  .admin-quiz-detail-cell {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
